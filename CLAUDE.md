@@ -10,7 +10,7 @@
 
 ## プロジェクト概要
 
-このプロジェクトは「NekoNyanMemoNote」という名前の PyQt6 ベースの Windows 専用メモアプリケーションです（v1.2.3）。
+このプロジェクトは「NekoNyanMemoNote」という名前の PyQt6 ベースの Windows 専用メモアプリケーションです（v1.2.4）。
 
 ### アプリケーションの特徴
 

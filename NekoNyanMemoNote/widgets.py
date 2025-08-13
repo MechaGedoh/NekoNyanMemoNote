@@ -56,11 +56,6 @@ class UpdateDebouncer(QTimer):
             
         except Exception as e:
             print(f"!!! ERROR: Execute updates error: {e}")
-        finally:
-            try:
-                self.timeout.disconnect(self._execute_updates)
-            except:
-                pass
 
 # --- 行番号表示用ウィジェット ---
 class LineNumberArea(QWidget):
@@ -111,6 +106,7 @@ class MemoTextEdit(QTextEdit):
         
         # 元のシグナル接続
         self.document().blockCountChanged.connect(self._schedule_line_number_update)
+        self.document().contentsChanged.connect(self._schedule_line_number_area_update)
         self.verticalScrollBar().valueChanged.connect(self._schedule_line_number_area_update)
         self.cursorPositionChanged.connect(self._schedule_highlight_update)
         self.cursorPositionChanged.connect(self._schedule_line_number_area_update)
@@ -188,6 +184,8 @@ class MemoTextEdit(QTextEdit):
     def update_line_number_area_width(self, _=0):
         self.lineNumberArea.update_width()
         self.lineNumberArea.update()
+        # 行番号表示の強制リフレッシュ
+        self.viewport().update()
 
     def highlight_current_line(self):
         extraSelections = self.extraSelections()

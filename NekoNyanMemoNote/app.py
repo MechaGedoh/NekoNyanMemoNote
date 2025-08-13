@@ -343,6 +343,8 @@ class MemoApp(QMainWindow):
             os.path.join(os.path.dirname(os.path.dirname(__file__)), icon_filename),
             # PyInstaller onefile モードのパス（sys._MEIPASS）
             os.path.join(RESOURCE_DIR, icon_filename),
+            # 実行ファイルと同じディレクトリ（配布時）
+            os.path.join(os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else os.path.dirname(os.path.dirname(__file__))), icon_filename),
             # 現在のディレクトリ
             icon_filename,
         ]
@@ -354,7 +356,11 @@ class MemoApp(QMainWindow):
                         print(f"DEBUG: アイコンファイルを発見: {icon_path}")
                     icon = QIcon(icon_path)
                     if not icon.isNull():
+                        # ウィンドウアイコンを設定
                         self.setWindowIcon(icon)
+                        # アプリケーション全体のアイコンも設定（タスクバー等用）
+                        from PyQt6.QtWidgets import QApplication
+                        QApplication.instance().setWindowIcon(icon)
                         if ENABLE_DEBUG_OUTPUT:
                             print(f"DEBUG: ウィンドウアイコン設定成功: {icon_path}")
                         return

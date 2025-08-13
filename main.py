@@ -48,6 +48,8 @@ def setup_application_icon(app):
         os.path.join(base_path, icon_filename),
         # RESOURCE_DIR使用
         os.path.join(RESOURCE_DIR, icon_filename),
+        # 実行ファイルと同じディレクトリ（配布時）
+        os.path.join(os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__), icon_filename),
         # カレントディレクトリ
         os.path.join(os.getcwd(), icon_filename),
         # 絶対パス指定
