@@ -1,0 +1,86 @@
+name: Bug report
+description: 不具合の報告テンプレート
+title: "[Bug] 問題の短い要約"
+labels: [bug]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        以下を可能な範囲でご記入ください。チェックリストは受け入れ条件の参考になります。
+
+  - type: input
+    id: version
+    attributes:
+      label: アプリのバージョン
+      description: 例) NekoNyanMemoNote v1.2.3（配布形態: onefile/onedir/スクリプト）
+      placeholder: v1.2.3
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要
+      description: 不具合の要約を短く記載
+      placeholder: 何が起きているかを1-2文で
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: 再現に必要なステップ（箇条書き）
+      placeholder: |
+        1. ...
+        2. ...
+        3. 期待しない結果: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待結果
+      description: 期待される挙動
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の結果
+      description: 実際の挙動（スクリーンショット/ログがあれば添付）
+
+  - type: textarea
+    id: env
+    attributes:
+      label: 環境情報
+      description: Windows ビルド/保存先/ストレージ種別など
+      placeholder: |
+        - OS: Windows 10/11 (ビルド ...)
+        - 配布形態: onefile / onedir / スクリプト
+        - ストレージ: ローカル / ネットワーク / OneDrive 等
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: ログ/添付
+      description: 関連ログやスクリーンショット
+
+  - type: checkboxes
+    id: acceptance
+    attributes:
+      label: 受け入れ条件（チェックリスト）
+      options:
+        - label: 再現手順で再現しないこと
+        - label: 既存機能の回帰がないこと
+        - label: ログ/エラーメッセージが明瞭であること
+
+  - type: textarea
+    id: fixplan
+    attributes:
+      label: 修正方針（最小差分）
+      description: 変更点の概要と既存仕様との整合（任意）
+
