@@ -7,7 +7,7 @@ from PyQt6.QtGui import QTextFormat
 
 # --- アプリケーション設定 ---
 APP_NAME = "NekoNyanMemoNote"
-APP_VERSION = "v1.2.4"
+APP_VERSION = "v1.2.5"
 
 # --- パス設定 ---
 

@@ -244,6 +244,9 @@ class MemoApp(QMainWindow):
         """ホットキーの設定"""
         self.insert_date_shortcut = QShortcut(QKeySequence("Ctrl+D"), self)
         self.insert_date_shortcut.activated.connect(self.insert_date)
+        
+        self.remove_tabs_newlines_shortcut = QShortcut(QKeySequence("Ctrl+Q"), self)
+        self.remove_tabs_newlines_shortcut.activated.connect(self.remove_tabs_and_newlines)
     
     def _on_auto_text_hotkey(self):
         """自動テキストホットキーが押された時の処理"""
@@ -347,7 +350,14 @@ class MemoApp(QMainWindow):
             os.path.join(os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else os.path.dirname(os.path.dirname(__file__))), icon_filename),
             # 現在のディレクトリ
             icon_filename,
+            # Windowsの場合、絶対パスも試行
+            os.path.abspath(icon_filename),
         ]
+        
+        if ENABLE_DEBUG_OUTPUT:
+            print(f"DEBUG: アイコン検索開始 - ファイル名: {icon_filename}")
+            print(f"DEBUG: RESOURCE_DIR: {RESOURCE_DIR}")
+            print(f"DEBUG: 検索パス候補: {icon_paths}")
         
         for icon_path in icon_paths:
             try:
@@ -599,6 +609,7 @@ class MemoApp(QMainWindow):
         # メニューとボタンの設定
         self._create_wrap_menu()
         self._create_auto_text_button()
+        self._create_tab_newline_remove_button()
         self._setup_shortcuts()
     
     def _create_wrap_menu(self):
@@ -641,6 +652,13 @@ class MemoApp(QMainWindow):
         settings_button.clicked.connect(self.show_auto_text_settings)
         self.status_bar.addPermanentWidget(settings_button)
     
+    def _create_tab_newline_remove_button(self):
+        # タブ・改行削除ボタンの作成
+        remove_button = QPushButton("タブ・改行削除")
+        remove_button.setToolTip("選択テキストまたは全テキストからタブと改行を削除する")
+        remove_button.clicked.connect(self.remove_tabs_and_newlines)
+        self.status_bar.addPermanentWidget(remove_button)
+    
     def _setup_shortcuts(self):
         # ショートカットの設定
         self.auto_text_shortcut = QShortcut(QKeySequence("Ctrl+W"), self)
@@ -657,6 +675,10 @@ class MemoApp(QMainWindow):
                 if self.auto_text_menu:
                     self.auto_text_menu.close()
                     self.auto_text_menu_visible = False
+                # フォーカスを現在のエディタに戻す
+                current_editor = self.get_current_editor()
+                if current_editor:
+                    current_editor.setFocus()
                 return True
             if Qt.Key.Key_0 <= key <= Qt.Key.Key_9:
                 number = key - Qt.Key.Key_0
@@ -1669,6 +1691,62 @@ class MemoApp(QMainWindow):
             else:
                 if ENABLE_DEBUG_OUTPUT:
                     print(f"DEBUG: Tab {i} - widget is not QSplitter: {type(widget)}")
+
+    def get_current_editor(self):
+        """現在のタブのエディタを取得する"""
+        current_widget = self.tab_widget.currentWidget()
+        if current_widget is None:
+            return None
+        
+        # QSplitterの場合、エディタは通常widget(1)にある
+        if isinstance(current_widget, QSplitter):
+            if current_widget.count() > 1:
+                editor = current_widget.widget(1)
+                if isinstance(editor, MemoTextEdit):
+                    return editor
+        
+        # 直接MemoTextEditの場合
+        if isinstance(current_widget, MemoTextEdit):
+            return current_widget
+        
+        return None
+
+    def remove_tabs_and_newlines(self):
+        """現在のエディタからタブと改行を削除する"""
+        try:
+            current_editor = self.get_current_editor()
+            if not current_editor:
+                QMessageBox.warning(self, "警告", "編集可能なメモが開かれていません。")
+                return
+            
+            cursor = current_editor.textCursor()
+            
+            # 選択テキストがある場合は選択部分のみ、ない場合は全体を処理
+            if cursor.hasSelection():
+                selected_text = cursor.selectedText()
+                # タブと改行を削除
+                processed_text = selected_text.replace('\t', '').replace('\n', '').replace('\r', '')
+                cursor.insertText(processed_text)
+                if ENABLE_DEBUG_OUTPUT:
+                    print(f"DEBUG: 選択テキストからタブ・改行を削除: {len(selected_text)} → {len(processed_text)} 文字")
+            else:
+                # 全テキストを処理
+                all_text = current_editor.toPlainText()
+                processed_text = all_text.replace('\t', '').replace('\n', '').replace('\r', '')
+                current_editor.setPlainText(processed_text)
+                if ENABLE_DEBUG_OUTPUT:
+                    print(f"DEBUG: 全テキストからタブ・改行を削除: {len(all_text)} → {len(processed_text)} 文字")
+            
+            # ステータス更新
+            self.update_footer_status()
+            
+        except Exception as e:
+            error_msg = f"タブ・改行削除中にエラーが発生しました: {str(e)}"
+            if ENABLE_DEBUG_OUTPUT:
+                print(f"ERROR: {error_msg}")
+                import traceback
+                traceback.print_exc()
+            QMessageBox.critical(self, "エラー", error_msg)
 
     def update_last_opened_file(self, file_path):
         current_folder_path = self.get_current_folder_path()
